@@ -28,7 +28,7 @@ jobs:
             -storepass homelab123 -keypass homelab123 \
             -dname "CN=HomeLab, OU=Home, O=Home, L=Home, ST=Home, C=RU"
 
-      - name: Patch android config
+      - name: Patch android config (AGP pin + manifest)
         run: python3 .github/patch_android.py
 
       - name: Build APK (unsigned)
