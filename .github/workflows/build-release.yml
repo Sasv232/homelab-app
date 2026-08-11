@@ -34,12 +34,13 @@ jobs:
       - name: Build APK (unsigned)
         run: flutter build apk --release
 
-      - name: Sign APK
+      - name: Sign APK (app-release.apk is debug-signed by template)
         run: |
+          ls -la build/app/outputs/flutter-apk/
           APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
           ZALIGN=$(ls $ANDROID_HOME/build-tools/*/zipalign | tail -1)
           mkdir -p dist
-          $ZALIGN -f 4 build/app/outputs/flutter-apk/app-release-unsigned.apk dist/aligned.apk
+          $ZALIGN -f 4 build/app/outputs/flutter-apk/app-release.apk dist/aligned.apk
           $APKSIGNER sign \
             --ks keystore.jks --ks-pass pass:homelab123 \
             --ks-key-alias homelab --key-pass pass:homelab123 \
