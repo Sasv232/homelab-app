@@ -67,12 +67,12 @@ class ServiceInfo {
 
   factory ServiceInfo.fromJson(Map<String, dynamic> j) => ServiceInfo(
         name: j['name'] ?? '?',
-        port: (j['port'] ?? 0) as int,
+        port: (j['port'] as num).toInt(),
         icon: j['icon'] ?? '🖥️',
         desc: j['desc'] ?? '',
         path: j['path'] ?? '/',
         online: j['online'] == true,
-        code: (j['code'] ?? 0) as int,
+        code: (j['code'] as num).toInt(),
       );
 }
 
@@ -94,11 +94,11 @@ class SystemInfo {
   });
 
   factory SystemInfo.fromJson(Map<String, dynamic> j) => SystemInfo(
-        cpuPercent: (j['cpuPercent'] ?? 0) as int,
-        memPercent: (j['memPercent'] ?? 0) as int,
-        memUsed: (j['memUsed'] ?? 0).toDouble(),
-        memTotal: (j['memTotal'] ?? 0).toDouble(),
-        uptime: (j['uptime'] ?? 0) as int,
+        cpuPercent: (j['cpuPercent'] as num).toInt(),
+        memPercent: (j['memPercent'] as num).toInt(),
+        memUsed: (j['memUsed'] as num).toDouble(),
+        memTotal: (j['memTotal'] as num).toDouble(),
+        uptime: (j['uptime'] as num).toInt(),
         hostname: j['hostname'] ?? '',
       );
 }
