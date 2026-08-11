@@ -23,7 +23,7 @@ jobs:
       - name: Generate keystore
         run: |
           keytool -genkeypair -v \
-            -keystore android/app/homelab.keystore \
+            -keystore keystore.jks \
             -alias homelab -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass homelab123 -keypass homelab123 \
             -dname "CN=HomeLab, OU=Home, O=Home, L=Home, ST=Home, C=RU"
@@ -31,13 +31,20 @@ jobs:
       - name: Patch android config
         run: python3 .github/patch_android.py
 
-      - name: Build APK
+      - name: Build APK (unsigned)
         run: flutter build apk --release
 
-      - name: Prepare artifact
+      - name: Sign APK
         run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          ZALIGN=$(ls $ANDROID_HOME/build-tools/*/zipalign | tail -1)
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-release.apk dist/homelab-app.apk
+          $ZALIGN -f 4 build/app/outputs/flutter-apk/app-release-unsigned.apk dist/aligned.apk
+          $APKSIGNER sign \
+            --ks keystore.jks --ks-pass pass:homelab123 \
+            --ks-key-alias homelab --key-pass pass:homelab123 \
+            --out dist/homelab-app.apk dist/aligned.apk
+          $APKSIGNER verify dist/homelab-app.apk
 
       - uses: actions/upload-artifact@v4
         with:
