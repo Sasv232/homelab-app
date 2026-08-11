@@ -70,6 +70,9 @@ jobs:
       - name: Create windows platform
         run: flutter create --platforms=windows --project-name homelab .
 
+      - name: Patch windows config
+        run: python .github/patch_windows.py
+
       - name: Build Windows EXE
         run: flutter build windows --release
 

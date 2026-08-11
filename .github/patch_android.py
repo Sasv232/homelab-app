@@ -13,7 +13,7 @@ settings = ROOT / "android" / "settings.gradle.kts"
 if settings.exists():
     s = settings.read_text()
     s = re.sub(r'id\("com\.android\.application"\) version "[^"]+"',
-               'id("com.android.application") version "8.7.3"', s)
+               'id("com.android.application") version "8.9.1"', s)
     s = re.sub(r'id\("org\.jetbrains\.kotlin\.android"\) version "[^"]+"',
                'id("org.jetbrains.kotlin.android") version "2.0.21"', s)
     settings.write_text(s)
