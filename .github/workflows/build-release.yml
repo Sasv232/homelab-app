@@ -18,7 +18,15 @@ jobs:
           cache: true
 
       - name: Create android platform
-        run: flutter create --platforms=android --org com.homelab --project-name homelab_app ..
+        run: flutter create --platforms=android --project-name homelab .
+
+      - name: Generate keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore android/app/homelab.keystore \
+            -alias homelab -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass homelab123 -keypass homelab123 \
+            -dname "CN=HomeLab, OU=Home, O=Home, L=Home, ST=Home, C=RU"
 
       - name: Patch android config
         run: python3 .github/patch_android.py
@@ -53,7 +61,7 @@ jobs:
           cache: true
 
       - name: Create windows platform
-        run: flutter create --platforms=windows --org com.homelab --project-name homelab_app ..
+        run: flutter create --platforms=windows --project-name homelab .
 
       - name: Build Windows EXE
         run: flutter build windows --release

@@ -1,14 +1,14 @@
 """Patch android config after `flutter create`:
 - add INTERNET permission
 - allow cleartext http traffic
-- sign release build with debug key (so APK is installable)
+- sign release build with generated keystore (android/app/homelab.keystore)
 """
 
-import re
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
+# ---------- AndroidManifest.xml ----------
 manifest = ROOT / "android" / "app" / "src" / "main" / "AndroidManifest.xml"
 text = manifest.read_text()
 
@@ -29,58 +29,61 @@ if 'usesCleartextTraffic="true"' not in text:
 manifest.write_text(text)
 print("manifest patched")
 
+# ---------- build.gradle.kts (new templates) ----------
 gradle = ROOT / "android" / "app" / "build.gradle.kts"
+
 if gradle.exists():
     g = gradle.read_text()
-    # ensure release uses debug signing so APK is installable
+
     if 'signingConfigs' not in g:
         g = g.replace(
-            'compileSdk = flutter.compileSdkVersion',
-            'compileSdk = flutter.compileSdkVersion\n'
-            '\n'
+            '    buildTypes {',
             '    signingConfigs {\n'
             '        create("release") {\n'
-            '            storeFile = file("${rootProject.projectDir}/debug.keystore")\n'
+            '            storeFile = file("homelab.keystore")\n'
+            '            storePassword = "homelab123"\n'
+            '            keyAlias = "homelab"\n'
+            '            keyPassword = "homelab123"\n'
             '        }\n'
-            '    }',
+            '    }\n'
+            '\n'
+            '    buildTypes {',
         )
-    if 'debug.keystore' in g and not (ROOT / "android" / "debug.keystore").exists():
-        # use the standard debug keystore from ~/.android
+
+    if 'getByName("release")' not in g:
         g = g.replace(
-            'storeFile = file("${rootProject.projectDir}/debug.keystore")',
-            'storeFile = file(System.getProperty("user.home") + "/.android/debug.keystore")\n'
-            '            storePassword = "android"\n'
-            '            keyAlias = "androiddebugkey"\n'
-            '            keyPassword = "android"',
+            '            signingConfig = signingConfigs.getByName("debug")',
+            '            signingConfig = signingConfigs.getByName("release")',
         )
-        g = g.replace(
-            'create("release")',
-            'create("release")',
-        )
+
     gradle.write_text(g)
-    print("build.gradle.kts patched (debug signing for release)")
+    print("build.gradle.kts patched")
+
 else:
-    # legacy groovy gradle
+    # ---------- legacy build.gradle ----------
     gradle = ROOT / "android" / "app" / "build.gradle"
     g = gradle.read_text()
+
     if 'signingConfigs' not in g:
         g = g.replace(
-            'android {',
-            'android {\n'
+            '    buildTypes {',
             '    signingConfigs {\n'
             '        release {\n'
-            '            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")\n'
-            '            storePassword "android"\n'
-            '            keyAlias "androiddebugkey"\n'
-            '            keyPassword "android"\n'
+            '            storeFile file("homelab.keystore")\n'
+            '            storePassword "homelab123"\n'
+            '            keyAlias "homelab"\n'
+            '            keyPassword "homelab123"\n'
             '        }\n'
-            '    }',
+            '    }\n'
+            '\n'
+            '    buildTypes {',
         )
+
     if 'signingConfig signingConfigs.release' not in g:
         g = g.replace(
-            'release {',
-            'release {\n            signingConfig signingConfigs.release',
-            1,
+            '            signingConfig signingConfigs.debug',
+            '            signingConfig signingConfigs.release',
         )
+
     gradle.write_text(g)
-    print("build.gradle patched (debug signing for release)")
+    print("build.gradle patched")
