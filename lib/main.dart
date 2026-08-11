@@ -143,7 +143,7 @@ class _HomePageState extends State<HomePage> {
     try {
       final res = await http
           .get(Uri.parse('$_serverUrl/api/status'))
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
       if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
       final d = jsonDecode(res.body) as Map<String, dynamic>;
       setState(() {
@@ -158,7 +158,10 @@ class _HomePageState extends State<HomePage> {
       if (!silent) {
         setState(() {
           _loading = false;
-          _error = 'Не удалось подключиться к серверу\n$_serverUrl\n\nПроверь адрес в настройках (⚙)';
+          _error = 'Не удалось подключиться к серверу\n$_serverUrl\n\n'
+              'Детали: $e\n\n'
+              'Проверь адрес в настройках (⚙).\n'
+              'С ПК должно быть доступно: Test-NetConnection ${Uri.parse(_serverUrl).host} -Port ${Uri.parse(_serverUrl).port}';
         });
       }
     }
